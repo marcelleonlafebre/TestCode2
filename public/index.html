@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test 1 Marcel Leon</title>
+  <meta charset="UTF-8">
+<script>
+	function routeReportFull(){
+		document.form1.location.disabled = true;		
+		document.form1.pLocation.disabled = true;
+		document.form1.connected.disabled = true;
+		document.form1.action = "reportFull";
+		document.form1.submit();
+	}
+	function routeReportMin(){
+		document.form1.location.disabled = true;	
+		document.form1.pLocation.disabled = true;
+		document.form1.connected.disabled = true;
+		document.form1.action = "reportMin";
+		document.form1.submit();
+	}
+	function enabledLocation(){
+		document.form1.location.disabled = false;
+		document.form1.pLocation.disabled = false;
+		document.form1.connected.disabled = false;
+	}
+	function searchDevices(filter){
+		document.form1.action = "reportFilter";
+		document.form1.submit();				
+	}
+</script>
+</head>
+<body>
+  
+  <form method="post" name="form1">
+<!--  Ingrese su nombre de usuario:
+  <input type="text" name="nombre" size="30"><br>
+  Ingrese clave:
+  <input type="password" name="clave" size="30"><br>  -->
+
+<p>
+Report devices full information <input name="option" type="radio" value="MIN" onclick="routeReportFull();"/>
+Report devices minimal information <input name="option" type="radio" value="FULL" onclick="routeReportMin();"/>
+<p>
+Devices by filter <input name="option" type="radio" value="FILTER" onclick="enabledLocation();"/>
+Location <select name="location" disabled="true" onchange="searchDevices(1);"><option value="S">Please select one</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select>
+Parent Location <select name="pLocation" disabled="true" onchange="searchDevices(2);"><option value="S">Please select one</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select>
+Connected <select name="connected" disabled="true" onchange="searchDevices(3);"><option value="S">Please select one</option><option value="true">true</option><option value="false">false</option></select>
+<p>
+</form>
+</body>
+</html>
