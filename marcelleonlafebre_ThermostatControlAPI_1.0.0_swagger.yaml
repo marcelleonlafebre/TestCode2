@@ -1,0 +1,408 @@
+swagger: '2.0'
+info:
+  description: This is a simple API
+  version: 1.0.0
+  title: Control Thermostat API
+  # put the contact info for your development or API team
+  contact:
+    email: marcelllafebre@hotmail.com
+
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+# tags are used for organizing operations
+tags:
+- name: admins
+  description: Secured Admin-only calls
+- name: developers
+  description: Operations available to regular developers
+
+paths:
+  /thermostat:
+    get:
+      tags:
+      - developers
+      summary: searches a thermostat device
+      operationId: searchThermostatDevice
+      description: |
+        By passing in the appropriate options, you can search for information of thermostat devices in the system
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: searchString
+        description: pass an optional search string for looking up thermostat devices
+        required: false
+        type: string
+      - in: query
+        name: skip
+        description: number of records to skip for pagination
+        type: integer
+        format: int32
+        minimum: 0
+      - in: query
+        name: limit
+        description: maximum number of records to return
+        type: integer
+        format: int32
+        minimum: 0
+        maximum: 50
+      responses:
+        200:
+          description: search results matching criteria
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ThermostatDevice'
+        400:
+          description: bad input parameter
+    post:
+      tags:
+      - developers
+      summary: set the mode and temperature of one thermostat device
+      operationId: setThermostat
+      description: Set the mode and temperature of one thermostat device
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: ThermostatDevice
+        description: DeviceThermosthat to set
+        schema:
+          $ref: '#/definitions/ThermostatDevice'
+      responses:
+        default:
+          description: Thermostat device configured
+        400:
+          description: invalid input, object invalid
+  /thermostat/cancelSettings:
+    post:
+      tags:
+      - admins
+      summary: Cancel the settings of one thermostat device by an administator.
+      operationId: cancelSettings
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - in: body
+        name: ThermostatDevice
+        description: Device Thermostat to cancel settings
+        required: true
+        schema:
+          type: array
+          items:
+            $ref: '#/definitions/ThermostatDevice'
+      responses:
+        default:
+          description: Settings cancelled for device
+  /provider:
+    post:
+      tags:
+      - admins
+      summary: Create provider
+      description: This can only be done by the logged in user with admin role.
+      operationId: createProvider
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - in: body
+        name: body
+        description: Created provider object
+        required: true
+        schema:
+          $ref: '#/definitions/Provider'
+      responses:
+        default:
+          description: successful operation  
+  /provider/{code}:
+    get:
+      tags:
+      - admins
+      summary: Get provider by user code
+      operationId: getProviderByCode
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - name: code
+        in: path
+        description: The code that needs to be fetched. Use provider1 for testing. 
+        required: true
+        type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Provider'
+        400:
+          description: Invalid code supplied
+        404:
+          description: provider not found
+    put:
+      tags:
+      - admins
+      summary: Updated provider
+      description: This can only be done by the logged in user with admin role.
+      operationId: updateProvider
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - name: code
+        in: path
+        description: code that need to be updated
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: Updated provider object
+        required: true
+        schema:
+          $ref: '#/definitions/Provider'
+      responses:
+        400:
+          description: Invalid code supplied
+        404:
+          description: Provider not found
+    delete:
+      tags:
+      - admins
+      summary: Delete provider
+      description: This can only be done by the logged in user with admin role.
+      operationId: deleteProvider
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - name: code
+        in: path
+        description: The code that needs to be deleted
+        required: true
+        type: string
+      responses:
+        400:
+          description: Invalid code supplied
+        404:
+          description: Provider not found
+          
+  /user:
+    post:
+      tags:
+      - developers
+      summary: Create user
+      description: This can only be done by the logged in user.
+      operationId: createUser
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - in: body
+        name: body
+        description: Created user object
+        required: true
+        schema:
+          $ref: '#/definitions/User'
+      responses:
+        default:
+          description: successful operation
+  /user/login:
+    get:
+      tags:
+      - developers
+      summary: Logs user into the system
+      operationId: loginUser
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - name: username
+        in: query
+        description: The user name for login
+        required: true
+        type: string
+      - name: password
+        in: query
+        description: The password for login in clear text
+        required: true
+        type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: string
+          headers:
+            X-Rate-Limit:
+              type: integer
+              format: int32
+              description: calls per hour allowed by the user
+            X-Expires-After:
+              type: string
+              format: date-time
+              description: date in UTC when token expires
+        400:
+          description: Invalid username/password supplied
+  /user/logout:
+    get:
+      tags:
+      - developers
+      summary: Logs out current logged in user session
+      operationId: logoutUser
+      produces:
+      - application/json
+      - application/xml
+      parameters: []
+      responses:
+        default:
+          description: successful operation
+  /user/{username}:
+    get:
+      tags:
+      - developers
+      summary: Get user by user name
+      operationId: getUserByName
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - name: username
+        in: path
+        description: The name that needs to be fetched. Use user1 for testing. 
+        required: true
+        type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/User'
+        400:
+          description: Invalid username supplied
+        404:
+          description: User not found
+    put:
+      tags:
+      - developers
+      summary: Updated user
+      description: This can only be done by the logged in user.
+      operationId: updateUser
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - name: username
+        in: path
+        description: name that need to be updated
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: Updated user object
+        required: true
+        schema:
+          $ref: '#/definitions/User'
+      responses:
+        400:
+          description: Invalid user supplied
+        404:
+          description: User not found
+    delete:
+      tags:
+      - developers
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: deleteUser
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - name: username
+        in: path
+        description: The name that needs to be deleted
+        required: true
+        type: string
+      responses:
+        400:
+          description: Invalid username supplied
+        404:
+          description: User not found
+securityDefinitions:
+  thermosatcontrol_auth:
+    type: oauth2
+    authorizationUrl: http://thermostatapi.swagger.io/oauth/dialog
+    flow: implicit
+    scopes:
+      write:SetThermostat: set thermostat in your account
+      write:cancelSettingsThermostat: cancel settings of thermostats in your account
+      read:thermostats: read your pets
+  api_key:
+    type: apiKey
+    name: api_key
+    in: header
+definitions:
+  ThermostatDevice:
+    type: object
+    required:
+    - serialNumber
+    - idVendor
+    - mode
+    - temperature
+    properties:
+      serialNumber:
+        type: string
+        format: uuid
+        example: d290f1ee-6c54-4b01-90e6-d701748f0851
+      idVendor:
+        $ref: '#/definitions/Provider'
+      mode:
+        type: string
+        example: HOT
+      temperature:
+        type: number
+        example: 22.5
+  Provider:
+    required:
+    - code
+    - name
+    properties:
+      code:
+        type: string
+        example: 123
+      name:
+        type: string        
+        example:  Provider 1
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      username:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      userStatus:
+        type: integer
+        format: int32
+        description: User Status
+      rolUser:
+        type: string
+        description: Rol of user (Admin or Developer)
+    xml:
+      name: User
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /marcelleonlafebre/ThermostatControlAPI/1.0.0
+schemes:
+ - https
